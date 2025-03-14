@@ -5,8 +5,6 @@ import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.util.Scanner;
 
-// TODO determine public/private for variables and methods
-
 public class GroupChat {
 
     static volatile boolean finished = false;
@@ -66,7 +64,7 @@ public class GroupChat {
         }
     }
 
-    public void changeName() {
+    private void changeName() {
         String prevName = name;
         System.out.print("New name: ");
         name = sc.nextLine();
