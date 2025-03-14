@@ -19,7 +19,7 @@ public class Main {
     }
 
     private static void displayGUI() {
-        JFrame frame = new JFrame();
+        JFrame frame = new JFrame("Multicast Chat Portal");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel(new GridBagLayout());
@@ -79,6 +79,14 @@ public class Main {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getActionCommand().equals("join")) {
+                    if (!isValidPort(portField.getText())) {
+                        System.out.println("ERROR: invalid port");
+                        return;
+                    }
+                    if (!isValidAddress(addressField.getText())) {
+                        System.out.println("ERROR: invalid address");
+                        return;
+                    }
                     displayChatGUI();
                     frame.setVisible(false);
                 }
@@ -98,6 +106,62 @@ public class Main {
 
     private static void displayChatGUI() {
 
+        JFrame chatFrame = new JFrame("Multicast Chat");
+        chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        chatFrame.setVisible(true);
+    }
+
+    private static boolean isValidPort(String portString) {
+        int port = 0;
+        try {
+            port = Integer.parseInt(portString);
+        } catch (Exception e) {
+            System.out.println("Port must be an integer");
+            e.printStackTrace();
+            return false;
+        }
+        return port >= 1024 && port <= 65535;
+    }
+
+    private static boolean isValidAddress(String address) {
+        address = address.trim();
+
+        for (int i = 0; i < 4; i++) {
+            String subStr;
+            if (address.contains(".")) {
+                subStr = address.substring(0, address.indexOf("."));  // creates a substring of the next number before the next period
+                address = address.substring(address.indexOf(".") + 1, address.length()); // removes the substring from the address
+            } else {
+                subStr = address;
+                address = "";
+            }
+            
+            int subAddress;
+            // tries to parse the substring, returns false if the parsing encounters an error
+            try {
+                subAddress = Integer.parseInt(subStr);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+            // invalid and returns false if first number is less than 224 or greater than 239
+            if (i == 0 && (subAddress < 224 || subAddress > 239)) {
+                return false;
+            // invalid and returns false if any number is not between 0 and 255
+            } else if (subAddress < 0 || subAddress > 255) {
+                return false;
+            // invalid and returns false if the address is 224.0.0.0
+            } else if (i == 0 && subAddress == 224 && address.charAt(address.length() - 1) == '0') {
+                return false;
+            }
+        }
+
+        // invalid and returns false if the address still has characters after being parsed
+        if (address.length() > 0) {
+            return false;
+        }
+
+        return true;
     }
     
 }
