@@ -8,23 +8,22 @@ import java.util.Scanner;
 public class GroupChat {
 
     static volatile boolean finished = false;
-    private final String CLOSE_MESSAGE = "!close";
-    private final String HELP_MESSAGE = "!help";
-    private final String CHANGE_NAME_MESSAGE = "!name";
-    static String name = "";
-    int multicastPort;
-    String multicastAddress;
-    MulticastSocket socket;
-    InetAddress group;
-    Scanner sc = new Scanner(System.in);
+    private static final String CLOSE_MESSAGE = "!close";
+    private static final String HELP_MESSAGE = "!help";
+    private static final String CHANGE_NAME_MESSAGE = "!name";
+    private static String name = "";
+    private static int multicastPort;
+    private static String multicastAddress;
+    private static MulticastSocket socket;
+    private static InetAddress group;
+    private static Scanner sc = new Scanner(System.in);
 
-
-    public GroupChat(int multicastPort, String multicastAddress) {
-        this.multicastPort = multicastPort;
-        this.multicastAddress = multicastAddress;
+    // doesn't allow other classes to instantiate GroupChat
+    private GroupChat() {
+        
     }
 
-    public void join() {
+    public static void join() {
         
         try {
             socket = new MulticastSocket(multicastPort);
@@ -32,29 +31,29 @@ public class GroupChat {
             socket.joinGroup(group);
             socket.setTimeToLive(5);
 
-            changeName();
-
             System.out.println("Type '" + HELP_MESSAGE + "' for commands");
 
             Thread thread = new Thread(new ReadThread(socket, group, multicastPort));
             thread.start();
 
-            while (!finished) {
-                String message;
-                message = sc.nextLine();
+            // TODO implement a new method to send messages (probably in ChatGUI.java)
+            // while (!finished) {
+            //     String message;
+            //     message = sc.nextLine();
 
-                if (message.equalsIgnoreCase(CLOSE_MESSAGE)) {
-                    sendMessage(name + " has left the chat");
-                    closeSocket();
-                    break;
-                } else if (message.equalsIgnoreCase(HELP_MESSAGE)) {
-                    listCommands();
-                } else if (message.equalsIgnoreCase(CHANGE_NAME_MESSAGE)) {
-                    changeName();
-                } else {
-                    sendMessageAsUser(message);
-                }
-            }
+            //     if (message.equalsIgnoreCase(CLOSE_MESSAGE)) {
+            //         sendMessage(name + " has left the chat");
+            //         closeSocket();
+            //         break;
+            //     } else if (message.equalsIgnoreCase(HELP_MESSAGE)) {
+            //         listCommands();
+            //     } else if (message.equalsIgnoreCase(CHANGE_NAME_MESSAGE)) {
+            //         setName("tempName");
+            //     } else {
+            //         sendMessageAsUser(message);
+            //     }
+            // }
+
         } catch (SocketException se) {
             System.out.println("Error creating socket");
             se.printStackTrace();
@@ -64,28 +63,30 @@ public class GroupChat {
         }
     }
 
-    private void changeName() {
-        String prevName = name;
-        System.out.print("New name: ");
-        name = sc.nextLine();
-        while (!name.matches("^[A-Za-z0-9]*$") || name.length() == 0) {
-            System.out.println("ERROR: name must only consist of letters and numbers");
-            System.out.print("New name: ");
-            name = sc.nextLine();
+    public static boolean setName(String newName) {
+        while (!newName.matches("^[A-Za-z0-9]*$") || newName.length() == 0 || newName.length() > 16) {
+            System.out.println("ERROR: name must only consist of letters and numbers and be no more than 15 characters");
+            System.out.println(newName + ", " + name);
+            return false;
         }
-        if (!name.equals(prevName) && prevName != "") {
-            sendMessage(prevName + " changed their name to " + name);
-        } else if (!name.equals(prevName)) {
-            sendMessage(name + " has joined the chat");
+        // update the name in the GUI if this is not the initial name set
+        if (name != "") {
+            ChatGUI.updateName(newName);
         }
+        name = newName;
+        return true;
     }
 
-    private void sendMessageAsUser(String message) {
+    public static String getName() {
+        return name;
+    }
+
+    public static void sendMessageAsUser(String message) {
         message = name + ": " + message;
         sendMessage(message);
     }
 
-    private void sendMessage(String message) {
+    public static void sendMessage(String message) {
         byte[] buffer = message.getBytes();
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, multicastPort);
         try {
@@ -100,7 +101,7 @@ public class GroupChat {
         } 
     }
 
-    private void closeSocket() {
+    private static void closeSocket() {
         finished = true;
         sc.close();
         try {
@@ -111,9 +112,27 @@ public class GroupChat {
         socket.close();
     }
 
-    private void listCommands() {
+    private static void listCommands() {
         System.out.println(CLOSE_MESSAGE + ": leave the chat");
         System.out.println(CHANGE_NAME_MESSAGE + " <new name>: change name");
     }
+
+    public static int getMulticastPort() {
+        return multicastPort;
+    }
+
+    public static void setMulticastPort(int multicastPort) {
+        GroupChat.multicastPort = multicastPort;
+    }
+
+    public static String getMulticastAddress() {
+        return multicastAddress;
+    }
+
+    public static void setMulticastAddress(String multicastAddress) {
+        GroupChat.multicastAddress = multicastAddress;
+    }
+
+    
 
 }

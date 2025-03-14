@@ -8,6 +8,7 @@ public class ReadThread implements Runnable {
     private MulticastSocket socket;
     private InetAddress group;
     private int port;
+    
     ReadThread(MulticastSocket socket, InetAddress group, int port) {
         this.socket = socket;
         this.group = group;
@@ -25,8 +26,9 @@ public class ReadThread implements Runnable {
                 socket.receive(datagram); 
                 message = new
                 String(buffer,0,datagram.getLength(),"UTF-8"); 
-                if (!message.startsWith(GroupChat.name)) {
-                    System.out.println(message); 
+                if (!message.startsWith(GroupChat.getName())) {
+                    System.out.println(message);
+                    ChatGUI.updateChatField(message);
                 }
             } catch(IOException e) { 
                 System.out.println("Socket closed!"); 
