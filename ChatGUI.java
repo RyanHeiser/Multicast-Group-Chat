@@ -1,21 +1,7 @@
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ScrollPaneConstants;
 
 public class ChatGUI {
 
@@ -77,7 +63,7 @@ public class ChatGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getActionCommand().equals("send")) {
-                    if (!isCommand(inputField.getText())) {
+                    if (!isCommand(inputField.getText()) && !inputField.getText().equals("")) {
                         GroupChat.sendMessageAsUser(inputField.getText());
                     }
                     inputField.setText("");
@@ -92,7 +78,7 @@ public class ChatGUI {
         chatArea.setFont(chatFont);
         chatArea.setEditable(false);
         chatArea.setLineWrap(true);
-        chatArea.setText("Use '!help' for list of commands\n\n");
+        chatArea.setText("Use '!help' for list of commands\n");
         
         //scroll
         scroll = new JScrollPane(chatArea);
@@ -141,7 +127,7 @@ public class ChatGUI {
      */
     public static void appendToChatArea(String message) {
         chatArea.append('\n' + message + '\n');
-        scroll.getVerticalScrollBar().setValue(scroll.getVerticalScrollBar().getMaximum()); // auto scroll down as new messages appear
+        chatArea.setCaretPosition(chatArea.getDocument().getLength());
         chatFrame.revalidate();
         chatFrame.repaint();
     }
@@ -190,8 +176,10 @@ public class ChatGUI {
      * Appends the available commands to the chat for the user to see
      */
     private static void listCommands() {
+        appendToChatArea("********************");
         appendToChatArea(CLOSE_MESSAGE + ": leave the chat");
         appendToChatArea(CHANGE_NAME_MESSAGE + " <new name>: change name");
+        appendToChatArea("********************");
     }
         
 }
