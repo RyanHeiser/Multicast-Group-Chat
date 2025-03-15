@@ -126,7 +126,7 @@ public class ChatGUI {
      * @param message: the message to append to the chat area
      */
     public static void appendToChatArea(String message) {
-        chatArea.append('\n' + message + '\n');
+        chatArea.append(message + '\n');
         chatArea.setCaretPosition(chatArea.getDocument().getLength());
         chatFrame.revalidate();
         chatFrame.repaint();
@@ -176,10 +176,10 @@ public class ChatGUI {
      * Appends the available commands to the chat for the user to see
      */
     private static void listCommands() {
-        appendToChatArea("********************");
+        appendToChatArea("\n==============================");
         appendToChatArea(CLOSE_MESSAGE + ": leave the chat");
         appendToChatArea(CHANGE_NAME_MESSAGE + " <new name>: change name");
-        appendToChatArea("********************");
+        appendToChatArea("==============================");
     }
         
 }

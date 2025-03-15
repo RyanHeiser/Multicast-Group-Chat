@@ -31,7 +31,7 @@ public class ReadThread implements Runnable {
             try { 
                 socket.receive(datagram); // attempts to receive a datagram packet
                 message = new String(buffer,0,datagram.getLength(),"UTF-8"); // convert the datagram to a string
-                ChatGUI.appendToChatArea(message); // add received message to chat area
+                ChatGUI.appendToChatArea('\n' + message); // add received message to chat area
             } catch(IOException e) { 
                 System.out.println("Socket closed!"); 
             } 

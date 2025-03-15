@@ -52,7 +52,7 @@ public class GroupChat {
         newName = newName.replace(" ", "");
         System.out.println(newName);
         while (!newName.matches("^[A-Za-z0-9]*$") || newName.length() == 0 || newName.length() > 16) {
-            ChatGUI.appendToChatArea("(ERROR): name must only consist of letters and numbers and be no more than 16 characters");
+            ChatGUI.appendToChatArea("\n(ERROR): name must only consist of letters and numbers and be no more than 16 characters\n");
             return false;
         }
         // Update the name in the GUI if this is not the initial name set
