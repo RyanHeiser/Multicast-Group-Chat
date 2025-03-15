@@ -112,6 +112,7 @@ public class PortalGUI {
         c.gridy = 2;
         panel.add(joinButton, c);
         
+        frame.getRootPane().setDefaultButton(joinButton);
         frame.setSize(400, 400);
         frame.add(panel);
         frame.setLocationRelativeTo(null);
