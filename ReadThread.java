@@ -28,7 +28,9 @@ public class ReadThread implements Runnable {
                 String(buffer,0,datagram.getLength(),"UTF-8"); 
                 if (!message.startsWith(GroupChat.getName())) {
                     System.out.println(message);
-                    ChatGUI.updateChatField(message);
+                    ChatGUI.appendToChatArea(message);
+                } else {
+                    ChatGUI.appendToChatArea(message);
                 }
             } catch(IOException e) { 
                 System.out.println("Socket closed!"); 

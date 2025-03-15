@@ -8,9 +8,6 @@ import java.util.Scanner;
 public class GroupChat {
 
     static volatile boolean finished = false;
-    private static final String CLOSE_MESSAGE = "!close";
-    private static final String HELP_MESSAGE = "!help";
-    private static final String CHANGE_NAME_MESSAGE = "!name";
     private static String name = "";
     private static int multicastPort;
     private static String multicastAddress;
@@ -31,28 +28,8 @@ public class GroupChat {
             socket.joinGroup(group);
             socket.setTimeToLive(5);
 
-            System.out.println("Type '" + HELP_MESSAGE + "' for commands");
-
             Thread thread = new Thread(new ReadThread(socket, group, multicastPort));
             thread.start();
-
-            // TODO implement a new method to send messages (probably in ChatGUI.java)
-            // while (!finished) {
-            //     String message;
-            //     message = sc.nextLine();
-
-            //     if (message.equalsIgnoreCase(CLOSE_MESSAGE)) {
-            //         sendMessage(name + " has left the chat");
-            //         closeSocket();
-            //         break;
-            //     } else if (message.equalsIgnoreCase(HELP_MESSAGE)) {
-            //         listCommands();
-            //     } else if (message.equalsIgnoreCase(CHANGE_NAME_MESSAGE)) {
-            //         setName("tempName");
-            //     } else {
-            //         sendMessageAsUser(message);
-            //     }
-            // }
 
         } catch (SocketException se) {
             System.out.println("Error creating socket");
@@ -64,6 +41,8 @@ public class GroupChat {
     }
 
     public static boolean setName(String newName) {
+        newName = newName.replace(" ", "");
+        System.out.println(newName);
         while (!newName.matches("^[A-Za-z0-9]*$") || newName.length() == 0 || newName.length() > 16) {
             System.out.println("ERROR: name must only consist of letters and numbers and be no more than 15 characters");
             System.out.println(newName + ", " + name);
@@ -72,6 +51,7 @@ public class GroupChat {
         // update the name in the GUI if this is not the initial name set
         if (name != "") {
             ChatGUI.updateName(newName);
+            sendMessage(name + " has changed their name to " + newName);
         }
         name = newName;
         return true;
@@ -91,7 +71,7 @@ public class GroupChat {
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, multicastPort);
         try {
             socket.send(packet);
-            Thread.sleep(500);
+            Thread.sleep(200);
         } catch (IOException e) {
             System.out.println("Error writing to socket");
             e.printStackTrace();
@@ -101,7 +81,7 @@ public class GroupChat {
         } 
     }
 
-    private static void closeSocket() {
+    public static void closeSocket() {
         finished = true;
         sc.close();
         try {
@@ -110,11 +90,6 @@ public class GroupChat {
             e.printStackTrace();
         }
         socket.close();
-    }
-
-    private static void listCommands() {
-        System.out.println(CLOSE_MESSAGE + ": leave the chat");
-        System.out.println(CHANGE_NAME_MESSAGE + " <new name>: change name");
     }
 
     public static int getMulticastPort() {

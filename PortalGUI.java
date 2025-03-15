@@ -103,6 +103,7 @@ public class PortalGUI {
                     GroupChat.setMulticastPort(Integer.parseInt(portField.getText()));
                     GroupChat.setMulticastAddress(addressField.getText());
                     GroupChat.join();
+                    GroupChat.sendMessage(GroupChat.getName() + " has joined the chat");
                 }
             }
         });

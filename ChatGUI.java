@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -6,14 +7,24 @@ import java.awt.Insets;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 
 public class ChatGUI {
+
+    private static final String CLOSE_MESSAGE = "!close";
+    private static final String HELP_MESSAGE = "!help";
+    private static final String CHANGE_NAME_MESSAGE = "!name";
 
     private static JFrame chatFrame;
     private static JPanel framePanel;
@@ -24,7 +35,8 @@ public class ChatGUI {
     private static JLabel nameLabel;
     private static JTextField inputField;
     private static JButton sendButton;
-    private static JTextField chatField;   
+    private static JTextArea chatArea;   
+    private static JScrollPane scroll;
 
     public static void displayGUI() {
 
@@ -65,24 +77,35 @@ public class ChatGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getActionCommand().equals("send")) {
-                    GroupChat.sendMessageAsUser(inputField.getText());
+                    if (!isCommand(inputField.getText())) {
+                        GroupChat.sendMessageAsUser(inputField.getText());
+                    }
+                    inputField.setText("");
                 }
             }
         });
 
         bottomPanel.add(sendButton, bottomC);
 
-        // chatField
-        chatField = new JTextField();
-        chatField.setFont(chatFont);
-        chatField.setEnabled(false);
+        // chatArea
+        chatArea = new JTextArea();
+        chatArea.setFont(chatFont);
+        chatArea.setEditable(false);
+        chatArea.setLineWrap(true);
+        chatArea.setText("Use '!help' for list of commands\n\n");
+        
+        //scroll
+        scroll = new JScrollPane(chatArea);
+        scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        scroll.setAutoscrolls(true);
         frameC.weighty = 1.0;
         frameC.weightx = 1.0;
         frameC.gridx = 0;
         frameC.gridy = 1;
         frameC.fill = GridBagConstraints.BOTH;
         frameC.insets = new Insets(5, 5, 5, 5);
-        framePanel.add(chatField, frameC);
+        framePanel.add(scroll, frameC);
+
 
         // framePanel
         frameC.weighty = 0;
@@ -95,16 +118,24 @@ public class ChatGUI {
         framePanel.add(bottomPanel, frameC);
 
         // chatFrame
-        //chatFrame.add(framePanel);
-        chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        chatFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         chatFrame.setSize(800, 600);
         chatFrame.setLocationRelativeTo(null);
         chatFrame.setContentPane(framePanel);
+
+        // send message, remove frame, and exit program when window is closed
+        chatFrame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                closeChat();
+            }
+        });
+
         chatFrame.setVisible(true);
     }
     
-    public static void updateChatField(String message) {
-        chatField.setText(chatField.getText() + "\n\n" + message);
+    public static void appendToChatArea(String message) {
+        chatArea.append('\n' + message + '\n');
+        scroll.getVerticalScrollBar().setValue(scroll.getVerticalScrollBar().getMaximum()); // auto scroll down as new messages appear
         chatFrame.revalidate();
         chatFrame.repaint();
     }
@@ -113,6 +144,33 @@ public class ChatGUI {
         nameLabel.setText(newName);
         chatFrame.revalidate();
         chatFrame.repaint();
+    }
+
+    private static void closeChat() {
+        GroupChat.sendMessage(GroupChat.getName() + " has left the chat");
+        chatFrame.dispose();
+        GroupChat.closeSocket();
+        System.exit(0);
+    }
+
+    private static Boolean isCommand(String message) {
+        message = message.trim();
+        if (message.equals(CLOSE_MESSAGE)) {
+            closeChat();
+            return true;
+        } else if (message.equals(HELP_MESSAGE)) {
+            listCommands();
+            return true;
+        } else if (message.startsWith(CHANGE_NAME_MESSAGE)) {
+            GroupChat.setName(message.substring(CHANGE_NAME_MESSAGE.length(), message.length()));
+            return true;
+        }
+        return false;
+    }
+
+    private static void listCommands() {
+        appendToChatArea(CLOSE_MESSAGE + ": leave the chat");
+        appendToChatArea(CHANGE_NAME_MESSAGE + " <new name>: change name");
     }
         
 }
