@@ -1,5 +1,4 @@
 import java.awt.Dimension;
-import java.awt.FocusTraversalPolicy;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -36,6 +35,9 @@ public class ChatGUI {
     private static JTextArea chatArea;   
     private static JScrollPane scroll;
 
+    /**
+     * Sets up the window and makes it visible
+     */
     public static void displayGUI() {
 
         chatFrame = new JFrame("Multicast Chat");
@@ -133,6 +135,10 @@ public class ChatGUI {
         inputField.requestFocus();
     }
     
+    /**
+     * Appends a message to the chat area
+     * @param message: the message to append to the chat area
+     */
     public static void appendToChatArea(String message) {
         chatArea.append('\n' + message + '\n');
         scroll.getVerticalScrollBar().setValue(scroll.getVerticalScrollBar().getMaximum()); // auto scroll down as new messages appear
@@ -140,12 +146,19 @@ public class ChatGUI {
         chatFrame.repaint();
     }
     
+    /**
+     * Updates the name label in the bottom left of the GUI
+     * @param newName the name to set the label to
+     */
     public static void updateName(String newName) {
         nameLabel.setText(newName);
         chatFrame.revalidate();
         chatFrame.repaint();
     }
 
+    /**
+     * Called when chat is closed. Sends a message that the user has left, closes the window, closes the socket, and exits the program
+     */
     private static void closeChat() {
         GroupChat.sendMessage(GroupChat.getName() + " has left the chat");
         chatFrame.dispose();
@@ -153,6 +166,11 @@ public class ChatGUI {
         System.exit(0);
     }
 
+    /**
+     * Checks if the message contains a command
+     * @param message: The message to check a command for
+     * @return: True if it is a command, false otherwise
+     */
     private static Boolean isCommand(String message) {
         message = message.trim();
         if (message.equals(CLOSE_MESSAGE)) {
@@ -168,6 +186,9 @@ public class ChatGUI {
         return false;
     }
 
+    /**
+     * Appends the available commands to the chat for the user to see
+     */
     private static void listCommands() {
         appendToChatArea(CLOSE_MESSAGE + ": leave the chat");
         appendToChatArea(CHANGE_NAME_MESSAGE + " <new name>: change name");
