@@ -1,4 +1,5 @@
 import java.awt.Dimension;
+import java.awt.FocusTraversalPolicy;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -129,6 +130,7 @@ public class ChatGUI {
         });
 
         chatFrame.setVisible(true);
+        inputField.requestFocus();
     }
     
     public static void appendToChatArea(String message) {
